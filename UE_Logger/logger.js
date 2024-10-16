@@ -17,6 +17,7 @@ const logColors = {
     0: '\x1b[37m', // 白色
     1: '\x1b[33m', // 黄色
     2: '\x1b[31m', // 红色
+    3: '\x1b[32m', // 绿色
 };
 
 // 日志等级重置为默认
@@ -27,7 +28,7 @@ const wss = new WebSocket.Server({ host: ip, port: port });
 
 // 处理连接
 wss.on('connection', (ws) => {
-    console.log('Client connected');
+    console.log(`${logColors[3]}Client connected${resetColor}`); 
 
     // 处理接收到的消息
     ws.on('message', (message) => {
@@ -45,7 +46,7 @@ wss.on('connection', (ws) => {
 
     // 处理连接关闭
     ws.on('close', () => {
-        console.log('Client disconnected');
+        console.log(`${logColors[3]}Client disconnected${resetColor}`); 
     });
 });
 
@@ -74,13 +75,13 @@ function getLogLevelString(level) {
 // 启动日志处理
 processLogQueue();
 
-console.log(`WebSocket server is running on ws://${ip}:${port}`);
+console.log(`${logColors[3]}WebSocket server is running on ws://${ip}:${port}${resetColor}`);
 
 // 处理进程关闭
 process.on('SIGINT', () => {
-    console.log('Closing WebSocket server...');
+    console.log(`${logColors[3]}Closing WebSocket server...${resetColor}`); 
     wss.close(() => {
-        console.log('WebSocket server closed.');
+        console.log(`${logColors[3]}WebSocket server closed.${resetColor}`);
         process.exit(0);
     });
 });

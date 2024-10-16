@@ -65,29 +65,29 @@ void ULoggerSystem::OnClosed(int32 StatusCode, const FString& Reason, bool bWasC
 	UE_LOG(Logger, Log, TEXT("WebSocket closed. Status code: %d. Reason: %s. Clean: %s"), StatusCode, *Reason, bWasClean ? TEXT("true") : TEXT("false"));
 }
 
-void ULoggerSystem::SendLog(const FLoggerSetting& Setting)
+void ULoggerSystem::SendLog(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting)
 {
 	switch (Setting.LogSetting) {
 	case ELogSetting::ELS_OnlyLogger:
-		PrintUE_Log(Setting, true, false, false);
+		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, false);
 		break;
 	case ELogSetting::ELS_LoggerAndUELog:
-		PrintUE_Log(Setting, true, false, true);
+		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, true);
 		break;
 	case ELogSetting::ELS_LoggerAndUEScreen:
-		PrintUE_Log(Setting, true, true, false);
+		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, false);
 		break;
 	case ELogSetting::ELS_OnlyUEScreen:
-		PrintUE_Log(Setting, false, true, false);
+		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, false);
 		break;
 	case ELogSetting::ELS_OnlyUELog:
-		PrintUE_Log(Setting, false, false, true);
+		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, false, true);
 		break;
 	case ELogSetting::ELS_UEScreenAndUELog:
-		PrintUE_Log(Setting, false, true, true);
+		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, true);
 		break;
 	case ELogSetting::ELS_All:
-		PrintUE_Log(Setting, true, true, true);
+		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, true);
 		break;
 	case ELogSetting::ELS_Null:
 		break;
@@ -123,15 +123,17 @@ void ULoggerSystem::PrintUE_ConsoleLog(const int32 Level, const FString& Message
 	}
 }
 
-void ULoggerSystem::PrintUE_Log(const FLoggerSetting& Setting, const bool IsPrintLogger, const bool IsPrintScreen, const bool IsConsoleLog)
+void ULoggerSystem::PrintUE_Log(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting, const bool IsPrintLogger, const bool IsPrintScreen, const bool IsConsoleLog)
 {
 	const auto LoggerLevel = GetLogLevel(Setting);
+	const auto WorldContextObjectName = IsUseWorldContextName ? (WorldContext ? FString::Printf(TEXT("(%s) "), *WorldContext->GetName()) : TEXT("(NULL) ")) : FString{""};
+	const auto LogContent = FString::Printf(TEXT("%s%s"), *WorldContextObjectName, *Setting.LogText.ToString());
 	
 	if (IsPrintLogger)
 	{
 		if (LoggerWS.IsValid() && LoggerWS->IsConnected())
 		{
-			const auto LoggerString = FString::Printf(TEXT("{\"level\":%d, \"content\":%s}"), LoggerLevel, *Setting.LogText.ToString());
+			const auto LoggerString = FString::Printf(TEXT("{\"level\":%d, \"content\":\"%s\"}"), LoggerLevel, *LogContent);
 			LoggerWS->Send(LoggerString);
 		}
 		else
@@ -141,10 +143,10 @@ void ULoggerSystem::PrintUE_Log(const FLoggerSetting& Setting, const bool IsPrin
 	}
 	if (IsConsoleLog)
 	{
-		PrintUE_ConsoleLog(LoggerLevel, Setting.LogText.ToString());
+		PrintUE_ConsoleLog(LoggerLevel, LogContent);
 	}
 	if (IsPrintScreen)
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), Setting.LogText.ToString(), true, false, Setting.LogScreenColor, Setting.LogScreenTime);
+		UKismetSystemLibrary::PrintString(GetWorld(), LogContent, true, false, Setting.LogScreenColor, Setting.LogScreenTime);
 	}
 }

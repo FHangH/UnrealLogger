@@ -116,3 +116,20 @@ UnrealLogger
 ![](Logger.assets/image-20241016111643096.png)
 
 如果你电脑挂了代理，这个应该是代理的问题，关掉代理再测试
+
+
+
+### 5. 补充更新
+
+- 2024-10-16更新：
+
+![image-20241016153058664](Logger.assets/image-20241016153058664.png)
+
+多了一个 `IsUseWorldContextName`，目的是方便查看日志打印时，可以看见这条日志打印的所在位置，比如：`UI, Actor, Level`等等；
+
+优化了`Logger Server`的打印样式，使用绿色显示连接状态
+
+![image-20241016153349930](Logger.assets/image-20241016153349930.png)
+
+![image-20241016153454816](Logger.assets/image-20241016153454816.png)
+

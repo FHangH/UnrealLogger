@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "LoggerSystem.h"
 #include "LoggerLib.generated.h"
-
-struct FLoggerSetting;
 
 UCLASS()
 class UNREALLOGGER_API ULoggerLib : public UBlueprintFunctionLibrary
@@ -14,6 +13,6 @@ class UNREALLOGGER_API ULoggerLib : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "FH|Logger", meta=(HidePin="WorldContext", DefaultToSelf="WorldContext"))
-	static void PrintLog(UObject* WorldContext, const FLoggerSetting& Setting);
+	UFUNCTION(BlueprintCallable, Category = "FH|Logger", meta=(DefaultToSelf="WorldContext"))
+	static void PrintLog(UObject* WorldContext, const bool IsUseWorldContextName = true, const FLoggerSetting& Setting = FLoggerSetting());
 };

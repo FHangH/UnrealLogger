@@ -33,7 +33,7 @@ public:
 	void MakeLoggerSetting(FLoggerWebSocketSetting Setting);
 
 	UFUNCTION()
-	void SendLog(const FLoggerSetting& Setting);
+	void SendLog(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting);
 
 	UFUNCTION(BlueprintCallable, Category="FH|Logger")
 	void CloseLogger() const;
@@ -46,5 +46,5 @@ protected:
 	
 	int32 GetLogLevel(const FLoggerSetting& Setting) const;
 	void PrintUE_ConsoleLog(const int32 Level, const FString& Message);
-	void PrintUE_Log(const FLoggerSetting& Setting, const bool IsPrintLogger, const bool IsPrintScreen, const bool IsConsoleLog);
+	void PrintUE_Log(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting, const bool IsPrintLogger, const bool IsPrintScreen, const bool IsConsoleLog);
 };

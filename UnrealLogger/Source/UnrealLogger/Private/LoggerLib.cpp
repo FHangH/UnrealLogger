@@ -2,16 +2,15 @@
 
 
 #include "LoggerLib.h"
-#include "LoggerSystem.h"
 #include "Subsystems/SubsystemBlueprintLibrary.h"
 
-void ULoggerLib::PrintLog(UObject* WorldContext, const FLoggerSetting& Setting)
+void ULoggerLib::PrintLog(UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting)
 {
 	if (const auto GameIns = USubsystemBlueprintLibrary::GetGameInstanceSubsystem(WorldContext, ULoggerSystem::StaticClass()))
 	{
 		if (const auto LoggerSys = Cast<ULoggerSystem>(GameIns))
 		{
-			LoggerSys->SendLog(Setting);
+			LoggerSys->SendLog(WorldContext, IsUseWorldContextName, Setting);
 		}
 	}
 	else
