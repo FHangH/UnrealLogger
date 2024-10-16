@@ -1,0 +1,15 @@
+{
+  "name": "ue_logger",
+  "version": "1.0.0",
+  "main": "logger.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "fangh.space",
+  "license": "ISC",
+  "description": "Unreal Engine Logger",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
