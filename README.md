@@ -75,11 +75,11 @@ UnrealLogger
 
 1. 初始化 `Logger System`：初始化相关配置和启动`WebSocket`服务
 
-   ![image-20241016111135588](REDME.assets/image-20241016111135588.png)
+   ![image-20241016111135588](Logger.assets/image-20241016111135588.png)
 
 2. 查看`PrintLog`方法
 
-   ![image-20241016111241741](REDME.assets/image-20241016111241741.png)
+   ![image-20241016111241741](Logger.assets/image-20241016111241741.png)
 
 3. `Log Type`介绍：
 
@@ -89,30 +89,30 @@ UnrealLogger
 
 4. `Log Setting`：
 
-   ![image-20241016111441276](REDME.assets/image-20241016111441276.png)
+   ![image-20241016111441276](Logger.assets/image-20241016111441276.png)
 
 5. `Log Screen Color`，`Log Screen Time`和 `UE printString`同理
 
 6. 测试蓝图：
 
-   ![image-20241016111612309](REDME.assets/image-20241016111612309.png)
+   ![image-20241016111612309](Logger.assets/image-20241016111612309.png)
 
    运行结果：
 
-   ![image-20241016111743694](REDME.assets/image-20241016111743694.png)
+   ![image-20241016111743694](Logger.assets/image-20241016111743694.png)
 
-   ![image-20241016111755695](REDME.assets/image-20241016111755695.png)
+   ![image-20241016111755695](Logger.assets/image-20241016111755695.png)
 
 7. 结束打印
 
-   ![image-20241016111826499](REDME.assets/image-20241016111826499.png)
+   ![image-20241016111826499](Logger.assets/image-20241016111826499.png)
 
-![image-20241016111842718](REDME.assets/image-20241016111842718.png)
+![image-20241016111842718](Logger.assets/image-20241016111842718.png)
 
 
 
 ### 4. UE客户端可能出现的问题
 
-![](REDME.assets/image-20241016111643096.png)
+![](Logger.assets/image-20241016111643096.png)
 
 如果你电脑挂了代理，这个应该是代理的问题，关掉代理再测试
