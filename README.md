@@ -1,8 +1,8 @@
 # Unreal Logger
 
 1. 一个可跨平台，简单，轻量，易维护的UE日志工具
-2. 解决UE项目打包发行版后，查看项目中手动添加的PrintLog等相关操作，无法轻易查看的问题
-3. 基于WebSocket通信，可以本地使用也可以部署云端
+2. 解决UE项目打包发行版后，查看项目中手动添加的PrintLog等相关操作，无法轻易查看日志的问题
+3. 基于WebSocket通信，可以本地使用，也可以部署云端
 
 
 
@@ -22,11 +22,11 @@ UnrealLogger
 
 
 
-`Logger Server`使用`nodejs`开发
+`Logger Server`：使用`nodejs`开发
 
-`UE Plugin`使用`UE 5.2`开发，纯源码，需要使用C++项目编译，只用了`UE`模块，理论上该插件也支持全平台，足够多的UE版本
+`UE Plugin`：使用`UE 5.2`开发，纯源码，需要使用C++项目编译，只用了`UE`模块，理论上该插件也支持全平台，足够多的UE版本
 
-`websocat.exe`启动`Logger Server`后，在`Windows`平台，可以简单使用该测试是否启用成功
+`websocat.exe`：启动`Logger Server`后，在`Windows`平台，可以简单使用该测试是否启用成功
 
 
 
@@ -43,7 +43,7 @@ UnrealLogger
 
 1. 使用控制台进入`UE_Logger`目录
 
-2. `node logger.js`启动 `Logger Server`
+2. 运行`node logger.js`启动 `Logger Server`
 
    - 默认启动的是 `127.0.0.1:6666`, 刷新间隔 `16ms`
    - 使用带参命令 `node logger.js 127.0.0.1 7777 100`可以该`Logger Server`的`IP, Port, 刷新间隔`
@@ -68,6 +68,8 @@ UnrealLogger
 #### UE 插件使用
 
 >注意：使用前，先确保 Logger Server已经启动，并测试通过
+>
+>如果：先启动了UE 客户端，再启动 Logger Server，应该是无法连接的，可以在客户端程序中，可以手动或特定时机触发 MakeLoggerSetting方法
 
 
 
