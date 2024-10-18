@@ -148,6 +148,6 @@ void ULoggerSystem::PrintUE_Log(const UObject* WorldContext, const bool IsUseWor
 	}
 	if (IsPrintScreen)
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), LogContent, true, false, Setting.LogScreenColor, Setting.LogScreenTime);
+		UKismetSystemLibrary::PrintString(WorldContext, LogContent, true, false, Setting.LogScreenColor, Setting.LogScreenTime);
 	}
 }

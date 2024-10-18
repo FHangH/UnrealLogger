@@ -152,3 +152,10 @@ UnrealLogger
 
 ![image-20241018153952526](README.assets/image-20241018153952526.png)
 
+
+
+完善蓝图的使用体验，默认`（WorldContextObject=Self, IsUseWorldContextName=True, LogType=Normal, Setting="Logger", LogScreenColor="0.0f, 0.66f, 1.0f, 1.0f", LogScreenTime=2.0f）`
+
+节点默认只显示`LogText`，`LogSetting`不再是结构体，而是默认折叠起来，和`UE蓝图 printString节点相同`
+
+![image-20241018173231908](README.assets/image-20241018173231908.png)
