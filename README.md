@@ -4,7 +4,7 @@
 2. 解决UE项目打包发行版后，查看项目中手动添加的PrintLog等相关操作，无法轻易查看日志的问题
 3. 基于WebSocket通信，可以本地使用，也可以部署云端
 
-[toc]
+
 
 ### 1. 结构介绍
 
@@ -53,7 +53,7 @@ UnrealLogger
 
    - 建议新开一个控制台，同样的目录下`websocat.exe ws://127.0.0.1:6666`
 
-     ![](Logger.assets/image-20241016110348961.png)
+     ![](README.assets/image-20241016110348961.png)
 
    - 测试数据：
 
@@ -61,7 +61,7 @@ UnrealLogger
      - `{"level":1, "content":"这是警告日志"}`
      - `{"level":2, "content":"这是错误日志"}`
 
-     ![image-20241016110715719](Logger.assets/image-20241016110715719.png)
+     ![image-20241016110715719](README.assets/image-20241016110715719.png)
 
 
 
@@ -75,11 +75,11 @@ UnrealLogger
 
 1. 初始化 `Logger System`：初始化相关配置和启动`WebSocket`服务
 
-   ![image-20241016111135588](Logger.assets/image-20241016111135588.png)
+   ![image-20241016111135588](README.assets/image-20241016111135588.png)
 
 2. 查看`PrintLog`方法
 
-   ![image-20241016111241741](Logger.assets/image-20241016111241741.png)
+   ![image-20241016111241741](README.assets/image-20241016111241741.png)
 
 3. `Log Type`介绍：
 
@@ -89,31 +89,31 @@ UnrealLogger
 
 4. `Log Setting`：
 
-   ![image-20241016111441276](Logger.assets/image-20241016111441276.png)
+   ![image-20241016111441276](README.assets/image-20241016111441276.png)
 
 5. `Log Screen Color`，`Log Screen Time`和 `UE printString`同理
 
 6. 测试蓝图：
 
-   ![image-20241016111612309](Logger.assets/image-20241016111612309.png)
+   ![image-20241016111612309](README.assets/image-20241016111612309.png)
 
    运行结果：
 
-   ![image-20241016111743694](Logger.assets/image-20241016111743694.png)
+   ![image-20241016111743694](README.assets/image-20241016111743694.png)
 
-   ![image-20241016111755695](Logger.assets/image-20241016111755695.png)
+   ![image-20241016111755695](README.assets/image-20241016111755695.png)
 
 7. 结束打印
 
-   ![image-20241016111826499](Logger.assets/image-20241016111826499.png)
+   ![image-20241016111826499](README.assets/image-20241016111826499.png)
 
-![image-20241016111842718](Logger.assets/image-20241016111842718.png)
+![image-20241016111842718](README.assets/image-20241016111842718.png)
 
 
 
 ### 4. UE客户端可能出现的问题
 
-![](Logger.assets/image-20241016111643096.png)
+![](README.assets/image-20241016111643096.png)
 
 如果你电脑挂了代理，这个应该是代理的问题，关掉代理再测试
 
@@ -126,21 +126,29 @@ UnrealLogger
 3. `node logger.js 0.0.0.0:6666`
 4. 在本地主机（windows）: `websocat.exe ws://公网IP:6666`即可
 
-![image-20241017174733239](Logger.assets/image-20241017174733239.png)
+![image-20241017174733239](README.assets/image-20241017174733239.png)
 
 
 
 ### 补充更新
 
-- 2024-10-16更新：
+#### 2024-10-16
 
-![image-20241016153058664](Logger.assets/image-20241016153058664.png)
+![image-20241016153058664](README.assets/image-20241016153058664.png)
 
 多了一个 `IsUseWorldContextName`，目的是方便查看日志打印时，可以看见这条日志打印的所在位置，比如：`UI, Actor, Level`等等；
 
 优化了`Logger Server`的打印样式，使用绿色显示连接状态
 
-![image-20241016153349930](Logger.assets/image-20241016153349930.png)
+![image-20241016153349930](README.assets/image-20241016153349930.png)
 
-![image-20241016153454816](Logger.assets/image-20241016153454816.png)
+![image-20241016153454816](README.assets/image-20241016153454816.png)
+
+
+
+#### 2024-10-18
+
+发送给`Logger Server`的日志，默认增加了时间戳 `UE 发送日志的时间`
+
+![image-20241018153952526](README.assets/image-20241018153952526.png)
 

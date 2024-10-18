@@ -32,6 +32,7 @@ wss.on('connection', (ws) => {
 
     // 处理接收到的消息
     ws.on('message', (message) => {
+        //console.log(`Received raw message: ${message}`); // 打印接收到的原始消息
         try {
             const logMessage = JSON.parse(message);
             if (logMessage.level !== undefined && logMessage.content) {
@@ -55,9 +56,9 @@ async function processLogQueue() {
     setInterval(() => {
         if (logQueue.length > 0) {
             const logMessage = logQueue.shift(); // 从队列中取出消息
-            const { level, content } = logMessage;
-            // 打印日志
-            console.log(`${logColors[level]}[${getLogLevelString(level)}] ${content}${resetColor}`);
+            const { time, level, content } = logMessage;
+            // 打印日志，使用时间戳
+            console.log(`${logColors[3]}${time}${logColors[level]}[${getLogLevelString(level)}] ${content}${resetColor}`);
         }
     }, checkInterval);
 }
