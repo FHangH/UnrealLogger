@@ -163,5 +163,5 @@ UnrealLogger
 
 ### 2024-10-28
 
-优化了 'PrintLog'节点默认的展开参数为：'LogType', 'LogText'，方便快速设置打印日志的类型，打印目标默认为'Screen, UE_LOG, UnrealLogger'
-修复了，传入'Json'字符串，无法正确解析的问题（需要对传入字符内，所有的 '""'做转义）
+优化了 `PrintLog`节点默认的展开参数为：`LogType`, `LogText`，方便快速设置打印日志的类型，打印目标默认为`Screen, UE_LOG, UnrealLogger`
+修复了，传入`Json`字符串，无法正确解析的问题（需要对传入字符内，所有的 `""`做转义）
