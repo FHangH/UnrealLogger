@@ -129,12 +129,13 @@ void ULoggerSystem::PrintUE_Log(const UObject* WorldContext, const bool IsUseWor
 	const auto LoggerLevel = GetLogLevel(Setting);
 	const auto WorldContextObjectName = IsUseWorldContextName ? (WorldContext ? FString::Printf(TEXT("(%s) "), *WorldContext->GetName()) : TEXT("(NULL) ")) : FString{""};
 	const auto LogContent = FString::Printf(TEXT("%s%s"), *WorldContextObjectName, *Setting.LogText.ToString());
+	const auto EscapedLogContent = LogContent.Replace(TEXT("\""), TEXT("\\\""));
 	
 	if (IsPrintLogger)
 	{
 		if (LoggerWS.IsValid() && LoggerWS->IsConnected())
 		{
-			const auto LoggerString = FString::Printf(TEXT("{\"time\":\"%s\", \"level\":%d, \"content\":\"%s\"}"), *LoggerTime, LoggerLevel, *LogContent);
+			const auto LoggerString = FString::Printf(TEXT("{\"time\":\"%s\", \"level\":%d, \"content\":\"%s\"}"), *LoggerTime, LoggerLevel, *EscapedLogContent);
 			LoggerWS->Send(LoggerString);
 		}
 		else
