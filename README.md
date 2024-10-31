@@ -161,7 +161,21 @@ UnrealLogger
 ![image-20241018173231908](README.assets/image-20241018173231908.png)
 
 
-### 2024-10-28
+
+#### 2024-10-28
 
 优化了 `PrintLog`节点默认的展开参数为：`LogType`, `LogText`，方便快速设置打印日志的类型，打印目标默认为`Screen, UE_LOG, UnrealLogger`
 修复了，传入`Json`字符串，无法正确解析的问题（需要对传入字符内，所有的 `""`做转义）
+
+
+
+#### 2024-10-29
+
+1. 修复打印`json`的相关问题
+2. 新增节点`SetGlobalSetting`，可以全局控制打印日志到何处
+
+
+
+#### 2024-10-31
+
+经过一段时间的使用，发现`LogType`还是默认`UE_Log-Logger`比较舒服
