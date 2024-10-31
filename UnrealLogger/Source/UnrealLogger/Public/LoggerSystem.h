@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -22,6 +22,9 @@ class UNREALLOGGER_API ULoggerSystem : public UGameInstanceSubsystem
 	/* Property */
 protected:
 	TSharedPtr<IWebSocket> LoggerWS;
+	bool IsUseGlobalLogSetting { false };
+	ELogType G_LogType { ELogType::ELT_Normal };
+	ELogSetting G_LogSetting { ELogSetting::ELS_All };
 
 	/* Function */
 public:
@@ -31,6 +34,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="FH|Logger")
 	void MakeLoggerSetting(FLoggerWebSocketSetting Setting);
+
+	UFUNCTION(BlueprintCallable, Category="FH|Logger")
+	void SetGlobalLogSetting(const bool UseGlobalLogSetting, ELogSetting Global_LogSetting = ELogSetting::ELS_All);
 
 	UFUNCTION()
 	void SendLog(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting);
