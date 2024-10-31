@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "LoggerSystem.h"
@@ -45,6 +45,12 @@ void ULoggerSystem::MakeLoggerSetting(const FLoggerWebSocketSetting Setting)
 	}
 }
 
+void ULoggerSystem::SetGlobalLogSetting(const bool UseGlobalLogSetting, const ELogSetting Global_LogSetting)
+{
+	IsUseGlobalLogSetting = UseGlobalLogSetting;	
+	G_LogSetting = Global_LogSetting;
+}
+
 void ULoggerSystem::OnConnected()
 {
 	UE_LOG(Logger, Log, TEXT("WebSocket connected!"));
@@ -67,30 +73,63 @@ void ULoggerSystem::OnClosed(int32 StatusCode, const FString& Reason, bool bWasC
 
 void ULoggerSystem::SendLog(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting)
 {
-	switch (Setting.LogSetting) {
-	case ELogSetting::ELS_OnlyLogger:
-		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, false);
-		break;
-	case ELogSetting::ELS_LoggerAndUELog:
-		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, true);
-		break;
-	case ELogSetting::ELS_LoggerAndUEScreen:
-		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, false);
-		break;
-	case ELogSetting::ELS_OnlyUEScreen:
-		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, false);
-		break;
-	case ELogSetting::ELS_OnlyUELog:
-		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, false, true);
-		break;
-	case ELogSetting::ELS_UEScreenAndUELog:
-		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, true);
-		break;
-	case ELogSetting::ELS_All:
-		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, true);
-		break;
-	case ELogSetting::ELS_Null:
-		break;
+	if (IsUseGlobalLogSetting)
+	{
+		switch (G_LogSetting)
+		{
+		case ELogSetting::ELS_OnlyLogger:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, false);
+			break;
+		case ELogSetting::ELS_LoggerAndUELog:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, true);
+			break;
+		case ELogSetting::ELS_LoggerAndUEScreen:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, false);
+			break;
+		case ELogSetting::ELS_OnlyUEScreen:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, false);
+			break;
+		case ELogSetting::ELS_OnlyUELog:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, false, true);
+			break;
+		case ELogSetting::ELS_UEScreenAndUELog:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, true);
+			break;
+		case ELogSetting::ELS_All:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, true);
+			break;
+		case ELogSetting::ELS_Null:
+			break;	
+		}
+	}
+	else
+	{
+		switch (Setting.LogSetting)
+		{
+		case ELogSetting::ELS_OnlyLogger:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, false);
+			break;
+		case ELogSetting::ELS_LoggerAndUELog:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, true);
+			break;
+		case ELogSetting::ELS_LoggerAndUEScreen:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, false);
+			break;
+		case ELogSetting::ELS_OnlyUEScreen:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, false);
+			break;
+		case ELogSetting::ELS_OnlyUELog:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, false, true);
+			break;
+		case ELogSetting::ELS_UEScreenAndUELog:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, true);
+			break;
+		case ELogSetting::ELS_All:
+			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, true);
+			break;
+		case ELogSetting::ELS_Null:
+			break;
+		}
 	}
 }
 
@@ -129,13 +168,22 @@ void ULoggerSystem::PrintUE_Log(const UObject* WorldContext, const bool IsUseWor
 	const auto LoggerLevel = GetLogLevel(Setting);
 	const auto WorldContextObjectName = IsUseWorldContextName ? (WorldContext ? FString::Printf(TEXT("(%s) "), *WorldContext->GetName()) : TEXT("(NULL) ")) : FString{""};
 	const auto LogContent = FString::Printf(TEXT("%s%s"), *WorldContextObjectName, *Setting.LogText.ToString());
-	const auto EscapedLogContent = LogContent.Replace(TEXT("\""), TEXT("\\\""));
-	
+
+	// 使用 JSON 库构建 LoggerString
+	const TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+	JsonObject->SetStringField(TEXT("time"), LoggerTime);
+	JsonObject->SetNumberField(TEXT("level"), LoggerLevel);
+	JsonObject->SetStringField(TEXT("content"), LogContent); // 直接使用 LogContent
+
 	if (IsPrintLogger)
 	{
+		// 序列化 JSON 对象为字符串
+		FString LoggerString;
+		const auto Writer = TJsonWriterFactory<>::Create(&LoggerString);
+		FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+		
 		if (LoggerWS.IsValid() && LoggerWS->IsConnected())
 		{
-			const auto LoggerString = FString::Printf(TEXT("{\"time\":\"%s\", \"level\":%d, \"content\":\"%s\"}"), *LoggerTime, LoggerLevel, *EscapedLogContent);
 			LoggerWS->Send(LoggerString);
 		}
 		else
