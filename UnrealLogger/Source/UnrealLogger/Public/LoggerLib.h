@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -19,7 +19,7 @@ public:
 		const bool IsUseWorldContextName = true,
 		const ELogType _LogType = ELogType::ELT_Normal,
 		const FText LogText = FText(),
-		const ELogSetting Setting = ELogSetting::ELS_All,
+		const ELogSetting Setting = ELogSetting::ELS_LoggerAndUELog,
 		const FLinearColor LogScreenColor = FLinearColor(0.0f, 0.66f, 1.0f, 1.0f),
 		const float LogScreenTime = 2.f);
 };
