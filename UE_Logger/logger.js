@@ -58,7 +58,7 @@ async function processLogQueue() {
             const logMessage = logQueue.shift(); // 从队列中取出消息
             const { time, level, content } = logMessage;
             // 打印日志，使用时间戳
-            console.log(`${logColors[3]}${time}${logColors[level]}[${getLogLevelString(level)}] ${content}${resetColor}`);
+            console.log(`${logColors[3]}${time} ${logColors[level]}[${getLogLevelString(level)}] ${content}${resetColor}`);
         }
     }, checkInterval);
 }
@@ -67,7 +67,7 @@ async function processLogQueue() {
 function getLogLevelString(level) {
     switch (level) {
         case 0: return 'Info';
-        case 1: return 'Warning';
+        case 1: return 'Warn';
         case 2: return 'Error';
         default: return 'Info';
     }
