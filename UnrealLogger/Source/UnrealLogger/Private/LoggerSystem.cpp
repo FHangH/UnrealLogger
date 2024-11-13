@@ -164,9 +164,9 @@ void ULoggerSystem::PrintUE_ConsoleLog(const int32 Level, const FString& Message
 
 void ULoggerSystem::PrintUE_Log(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting, const bool IsPrintLogger, const bool IsPrintScreen, const bool IsConsoleLog)
 {
-	const auto LoggerTime = FString::Printf(TEXT("[%s] "), *FDateTime::Now().ToString());
+	const auto LoggerTime = FString::Printf(TEXT("[%s]"), *FDateTime::Now().ToString());
 	const auto LoggerLevel = GetLogLevel(Setting);
-	const auto WorldContextObjectName = IsUseWorldContextName ? (WorldContext ? FString::Printf(TEXT("(%s) "), *WorldContext->GetName()) : TEXT("(NULL) ")) : FString{""};
+	const auto WorldContextObjectName = IsUseWorldContextName ? (WorldContext ? FString::Printf(TEXT("(%s)"), *WorldContext->GetName()) : TEXT("(NULL)")) : FString{""};
 	const auto LogContent = FString::Printf(TEXT("%s%s"), *WorldContextObjectName, *Setting.LogText.ToString());
 
 	// 使用 JSON 库构建 LoggerString
