@@ -206,6 +206,7 @@ void ULoggerSystem::SendLog(const UObject* WorldContext, const bool IsUseWorldCo
 
 void ULoggerSystem::CloseLogger()
 {
+	IsTimerStarted = false;
 	LogQueue.Empty();
 	
 	if (LoggerWS.IsValid())
