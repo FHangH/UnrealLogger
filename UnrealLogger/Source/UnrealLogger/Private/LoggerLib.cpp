@@ -1,7 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "LoggerLib.h"
+﻿#include "LoggerLib.h"
 #include "Subsystems/SubsystemBlueprintLibrary.h"
 
 void ULoggerLib::PrintLog(UObject* WorldContext, const bool IsUseWorldContextName, const ELogType _LogType,

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -21,10 +19,21 @@ class UNREALLOGGER_API ULoggerSystem : public UGameInstanceSubsystem
 
 	/* Property */
 protected:
+	// Default Setting
 	TSharedPtr<IWebSocket> LoggerWS;
 	bool IsUseGlobalLogSetting { false };
 	ELogType G_LogType { ELogType::ELT_Normal };
 	ELogSetting G_LogSetting { ELogSetting::ELS_All };
+
+	// Queue Mode Setting
+	bool IsUseQueueMode { false };
+	float QueueCheckInterval { 0.1f };
+	FTimerHandle QueueTimerHandle;
+	TArray<FQueuedLogEntry> LogQueue;
+	bool IsTimerStarted { false };
+
+	UPROPERTY()
+	UWorld* LoggerWorld { nullptr };
 
 	/* Function */
 public:
@@ -42,13 +51,17 @@ public:
 	void SendLog(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting);
 
 	UFUNCTION(BlueprintCallable, Category="FH|Logger")
-	void CloseLogger() const;
+	void CloseLogger();
 
 protected:
 	void OnConnected();
 	void OnMessage(const FString& Message);
 	void OnConnectionError(const FString& Error);
 	void OnClosed(int32 StatusCode, const FString& Reason, bool bWasClean);
+
+	void DetermineLogSettings(ELogSetting LogSetting, bool& OutIsPrintLogger, bool& OutIsPrintScreen, bool& OutIsConsoleLog);
+	void StartQueueProcessing();
+	void ProcessLogQueue();
 	
 	int32 GetLogLevel(const FLoggerSetting& Setting) const;
 	void PrintUE_ConsoleLog(const int32 Level, const FString& Message);

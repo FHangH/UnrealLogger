@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "LoggerSystem.h"
 #include "LoggerSetting.h"
 #include "WebSocketsModule.h"
@@ -20,15 +17,35 @@ void ULoggerSystem::Deinitialize()
 {
 	Super::Deinitialize();
 
-	if (LoggerWS.IsValid())
+	CloseLogger();
+
+	if (QueueTimerHandle.IsValid())
 	{
-		LoggerWS->Close();
-		LoggerWS = nullptr;
+		if (const auto World = GetWorld())
+		{
+			World->GetTimerManager().ClearTimer(QueueTimerHandle);
+		}
+		QueueTimerHandle.Invalidate();
 	}
+	LogQueue.Empty();
 }
 
 void ULoggerSystem::MakeLoggerSetting(const FLoggerWebSocketSetting Setting)
 {
+	IsUseQueueMode = Setting.IsUseEnableQueueMode;
+	QueueCheckInterval = Setting.QueueCheckIntervalSeconds;
+
+	if (IsUseQueueMode)
+	{
+		if (const auto World = GetWorld())
+		{
+			IsTimerStarted = false;
+			World->GetTimerManager().SetTimer(QueueTimerHandle, this, &ULoggerSystem::ProcessLogQueue, QueueCheckInterval, true);
+			World->GetTimerManager().PauseTimer(QueueTimerHandle);
+			UE_LOG(Logger, Log, TEXT("Begin Queue Mode"));
+		}
+	}
+	
 	const FString WS_URL = FString::Printf(TEXT("ws://%s:%s"), *Setting.WebSocketURL, *Setting.Port);
 	FWebSocketsModule& WebSocketModule = FWebSocketsModule::Get();
 	
@@ -68,77 +85,141 @@ void ULoggerSystem::OnConnectionError(const FString& Error)
 
 void ULoggerSystem::OnClosed(int32 StatusCode, const FString& Reason, bool bWasClean)
 {
+	LogQueue.Empty();
 	UE_LOG(Logger, Log, TEXT("WebSocket closed. Status code: %d. Reason: %s. Clean: %s"), StatusCode, *Reason, bWasClean ? TEXT("true") : TEXT("false"));
+}
+
+void ULoggerSystem::DetermineLogSettings(ELogSetting LogSetting, bool& OutIsPrintLogger, bool& OutIsPrintScreen, bool& OutIsConsoleLog)
+{
+	switch (LogSetting)
+	{
+	case ELogSetting::ELS_OnlyLogger:
+		OutIsPrintLogger = true;
+		OutIsPrintScreen = false;
+		OutIsConsoleLog = false;
+		break;
+	case ELogSetting::ELS_LoggerAndUELog:
+		OutIsPrintLogger = true;
+		OutIsPrintScreen = false;
+		OutIsConsoleLog = true;
+		break;
+	case ELogSetting::ELS_LoggerAndUEScreen:
+		OutIsPrintLogger = true;
+		OutIsPrintScreen = true;
+		OutIsConsoleLog = false;
+		break;
+	case ELogSetting::ELS_OnlyUEScreen:
+		OutIsPrintLogger = false;
+		OutIsPrintScreen = true;
+		OutIsConsoleLog = false;
+		break;
+	case ELogSetting::ELS_OnlyUELog:
+		OutIsPrintLogger = false;
+		OutIsPrintScreen = false;
+		OutIsConsoleLog = true;
+		break;
+	case ELogSetting::ELS_UEScreenAndUELog:
+		OutIsPrintLogger = false;
+		OutIsPrintScreen = true;
+		OutIsConsoleLog = true;
+		break;
+	case ELogSetting::ELS_All:
+		OutIsPrintLogger = true;
+		OutIsPrintScreen = true;
+		OutIsConsoleLog = true;
+		break;
+	case ELogSetting::ELS_Null:
+	default:
+		OutIsPrintLogger = false;
+		OutIsPrintScreen = false;
+		OutIsConsoleLog = false;
+		break;
+	}
+}
+
+void ULoggerSystem::StartQueueProcessing()
+{
+	if (const auto World = GetWorld())
+	{
+		if (QueueTimerHandle.IsValid())
+		{
+			IsTimerStarted = true;
+			World->GetTimerManager().UnPauseTimer(QueueTimerHandle);
+		}
+		else
+		{
+			IsTimerStarted = true;
+			World->GetTimerManager().SetTimer(QueueTimerHandle, this, &ULoggerSystem::ProcessLogQueue, QueueCheckInterval, true);
+		}
+		UE_LOG(Logger, Log, TEXT("Start Queue Timer"));
+	}
+}
+
+void ULoggerSystem::ProcessLogQueue()
+{
+	if (LogQueue.IsEmpty()) return;
+
+	const auto Entry = LogQueue[0];
+	LogQueue.RemoveAt(0);
+	PrintUE_Log(Entry.WorldContext, Entry.IsUseWorldContextName, Entry.Setting, Entry.IsPrintLogger, Entry.IsPrintScreen, Entry.IsConsoleLog);
+
+	if (const auto World = GetWorld())
+	{
+		if (QueueTimerHandle.IsValid() && LogQueue.IsEmpty())
+		{
+			IsTimerStarted = false;
+			World->GetTimerManager().PauseTimer(QueueTimerHandle);
+			UE_LOG(Logger, Log, TEXT("Pause Queue Timer"));
+		}
+	}
 }
 
 void ULoggerSystem::SendLog(const UObject* WorldContext, const bool IsUseWorldContextName, const FLoggerSetting& Setting)
 {
+	bool IsPrintLogger, IsPrintScreen, IsConsoleLog;
+
+	// Determine log settings based on global or per-log config
 	if (IsUseGlobalLogSetting)
 	{
-		switch (G_LogSetting)
-		{
-		case ELogSetting::ELS_OnlyLogger:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, false);
-			break;
-		case ELogSetting::ELS_LoggerAndUELog:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, true);
-			break;
-		case ELogSetting::ELS_LoggerAndUEScreen:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, false);
-			break;
-		case ELogSetting::ELS_OnlyUEScreen:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, false);
-			break;
-		case ELogSetting::ELS_OnlyUELog:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, false, true);
-			break;
-		case ELogSetting::ELS_UEScreenAndUELog:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, true);
-			break;
-		case ELogSetting::ELS_All:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, true);
-			break;
-		case ELogSetting::ELS_Null:
-			break;	
-		}
+		DetermineLogSettings(G_LogSetting, IsPrintLogger, IsPrintScreen, IsConsoleLog);
 	}
 	else
 	{
-		switch (Setting.LogSetting)
+		DetermineLogSettings(Setting.LogSetting, IsPrintLogger, IsPrintScreen, IsConsoleLog);
+	}
+
+	if (IsUseQueueMode)
+	{
+		const FQueuedLogEntry Entry { WorldContext, IsUseWorldContextName, Setting, IsPrintLogger, IsPrintScreen, IsConsoleLog };
+		LogQueue.Add(Entry);
+
+		if (!IsTimerStarted)
 		{
-		case ELogSetting::ELS_OnlyLogger:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, false);
-			break;
-		case ELogSetting::ELS_LoggerAndUELog:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, false, true);
-			break;
-		case ELogSetting::ELS_LoggerAndUEScreen:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, false);
-			break;
-		case ELogSetting::ELS_OnlyUEScreen:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, false);
-			break;
-		case ELogSetting::ELS_OnlyUELog:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, false, true);
-			break;
-		case ELogSetting::ELS_UEScreenAndUELog:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, false, true, true);
-			break;
-		case ELogSetting::ELS_All:
-			PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, true, true, true);
-			break;
-		case ELogSetting::ELS_Null:
-			break;
+			StartQueueProcessing();
 		}
+	}
+	else // Immediate processing
+	{
+		PrintUE_Log(WorldContext, IsUseWorldContextName, Setting, IsPrintLogger, IsPrintScreen, IsConsoleLog);
 	}
 }
 
-void ULoggerSystem::CloseLogger() const
+void ULoggerSystem::CloseLogger()
 {
+	LogQueue.Empty();
+	
 	if (LoggerWS.IsValid())
 	{
 		LoggerWS->Close();
+		LoggerWS = nullptr;
 	}
+
+	if (QueueTimerHandle.IsValid())
+	{
+		QueueTimerHandle.Invalidate();
+	}
+
+	UE_LOG(Logger, Warning, TEXT("Close Logger"));
 }
 
 int32 ULoggerSystem::GetLogLevel(const FLoggerSetting& Setting) const
@@ -148,17 +229,12 @@ int32 ULoggerSystem::GetLogLevel(const FLoggerSetting& Setting) const
 
 void ULoggerSystem::PrintUE_ConsoleLog(const int32 Level, const FString& Message)
 {
-	if (Level == 0)
+	switch (Level)
 	{
-		UE_LOG(Logger, Log, TEXT("%s"), *Message);
-	}
-	if (Level == 1)
-	{
-		UE_LOG(Logger, Warning, TEXT("%s"), *Message);
-	}
-	if (Level == 2)
-	{
-		UE_LOG(Logger, Error, TEXT("%s"), *Message);
+	case 0: UE_LOG(Logger, Log, TEXT("%s"), *Message); break;
+	case 1: UE_LOG(Logger, Warning, TEXT("%s"), *Message); break;
+	case 2: UE_LOG(Logger, Error, TEXT("%s"), *Message); break;
+	default: ;
 	}
 }
 
@@ -169,28 +245,26 @@ void ULoggerSystem::PrintUE_Log(const UObject* WorldContext, const bool IsUseWor
 	const auto WorldContextObjectName = IsUseWorldContextName ? (WorldContext ? FString::Printf(TEXT("(%s)"), *WorldContext->GetName()) : TEXT("(NULL)")) : FString{""};
 	const auto LogContent = FString::Printf(TEXT("%s%s"), *WorldContextObjectName, *Setting.LogText.ToString());
 
-	// 使用 JSON 库构建 LoggerString
-	const TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
-	JsonObject->SetStringField(TEXT("time"), LoggerTime);
-	JsonObject->SetNumberField(TEXT("level"), LoggerLevel);
-	JsonObject->SetStringField(TEXT("content"), LogContent); // 直接使用 LogContent
-
-	if (IsPrintLogger)
+	if (IsPrintLogger && LoggerWS.IsValid() && LoggerWS->IsConnected())
 	{
+		// 使用 JSON 库构建 LoggerString
+		const TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+		JsonObject->SetStringField(TEXT("time"), LoggerTime);
+		JsonObject->SetNumberField(TEXT("level"), LoggerLevel);
+		JsonObject->SetStringField(TEXT("content"), LogContent); // 直接使用 LogContent
+		
 		// 序列化 JSON 对象为字符串
 		FString LoggerString;
 		const auto Writer = TJsonWriterFactory<>::Create(&LoggerString);
 		FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 		
-		if (LoggerWS.IsValid() && LoggerWS->IsConnected())
-		{
-			LoggerWS->Send(LoggerString);
-		}
-		else
-		{
-			UE_LOG(Logger, Error, TEXT("WebSocket is not connected!"));
-		}
+		LoggerWS->Send(LoggerString);
 	}
+	else
+	{
+		UE_LOG(Logger, Error, TEXT("WebSocket is not connected!"));
+	}
+	
 	if (IsConsoleLog)
 	{
 		PrintUE_ConsoleLog(LoggerLevel, LogContent);

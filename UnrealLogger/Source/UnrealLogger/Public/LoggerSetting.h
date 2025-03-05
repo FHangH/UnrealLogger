@@ -54,4 +54,34 @@ struct FLoggerWebSocketSetting
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Logger")
 	FString Port { "6666" };
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Logger")
+	bool IsUseEnableQueueMode { false };
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Logger")
+	float QueueCheckIntervalSeconds { 0.1f };
+};
+
+USTRUCT(BlueprintType)
+struct FQueuedLogEntry
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	const UObject* WorldContext { nullptr };
+
+	UPROPERTY()
+	bool IsUseWorldContextName { false };
+
+	UPROPERTY()
+	FLoggerSetting Setting {};
+
+	UPROPERTY()
+	bool IsPrintLogger { false };
+
+	UPROPERTY()
+	bool IsPrintScreen { false };
+
+	UPROPERTY()
+	bool IsConsoleLog { false };
 };

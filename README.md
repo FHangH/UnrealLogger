@@ -179,3 +179,66 @@ UnrealLogger
 #### 2024-10-31
 
 经过一段时间的使用，发现`LogType`还是默认`UE_Log-Logger`比较舒服
+
+
+
+#### 2025-03-05
+
+![image-20250305160320327](README.assets/image-20250305160320327.png)
+
+修改节点`MakeLoggerSetting`
+
+新增字段：
+
+- `IsEnableQueueMode`：是否开启队列模式
+- `QueueCheckIntervalSeconds`：队列检查的间隔时间
+
+
+
+此前在`GameInstance`中的`Init()`使用，可能时机过早，丢失了日志信息；
+
+加入队列模式后，同样的情况下，日志不会丢失，而是进入队列中，当初始化完毕可以正常使用之后的新打印，会触发队列检查，将此前无法正常打印的信息打印出来
+
+
+
+总之：在`GameInstance`的`Init()`之后`MakeLoggerSetting()`时机过早；
+解决方案：
+
+- 在自定义的`GameInstance.cpp`中声明`OnPostInit`
+
+  ```c++
+  UCLASS()
+  class TEST_TUTORIAL_API UFH_GameInstance : public UGameInstance
+  {
+  	GENERATED_BODY()
+  
+  protected:
+  	virtual void Init() override;
+  
+  	UFUNCTION(BlueprintNativeEvent, Category="FH|GameInstance")
+  	void OnPostInit();
+  };
+  ```
+
+- 在`Init()`中调用`OnPostInit()`
+
+  ```c++
+  void UFH_GameInstance::Init()
+  {
+  	Super::Init();
+  
+  	OnPostInit();
+  }
+  
+  void UFH_GameInstance::OnPostInit_Implementation()
+  {
+  }
+  ```
+
+- 在蓝图中定义：`OnPostInit()`
+
+- 建议在这之后进行游戏逻辑
+
+![image-20250305162119649](README.assets/image-20250305162119649.png)
+
+这样使用，比较靠谱，如果是在`GameMode`,`PlayerController`或其它`A*`的类型对象中使用，则不必担心这个问题
