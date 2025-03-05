@@ -32,9 +32,6 @@ protected:
 	TArray<FQueuedLogEntry> LogQueue;
 	bool IsTimerStarted { false };
 
-	UPROPERTY()
-	UWorld* LoggerWorld { nullptr };
-
 	/* Function */
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
