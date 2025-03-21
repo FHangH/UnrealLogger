@@ -70,6 +70,7 @@ void ULoggerSystem::SetGlobalLogSetting(const bool UseGlobalLogSetting, const EL
 
 void ULoggerSystem::OnConnected()
 {
+	OnUnrealLoggerConnectedServer.Broadcast(true);
 	UE_LOG(Logger, Log, TEXT("WebSocket connected!"));
 }
 
@@ -80,6 +81,7 @@ void ULoggerSystem::OnMessage(const FString& Message)
 
 void ULoggerSystem::OnConnectionError(const FString& Error)
 {
+	OnUnrealLoggerConnectedServer.Broadcast(false);
 	UE_LOG(Logger, Error, TEXT("Connection error: %s"), *Error);
 }
 

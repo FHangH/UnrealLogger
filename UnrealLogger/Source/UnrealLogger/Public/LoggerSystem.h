@@ -12,6 +12,8 @@ struct FLoggerWebSocketSetting;
 DECLARE_LOG_CATEGORY_EXTERN(Logger, Log, All);
 inline DEFINE_LOG_CATEGORY(Logger);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUnrealLoggerConnectedServer, bool, IsConnected);
+
 UCLASS()
 class UNREALLOGGER_API ULoggerSystem : public UGameInstanceSubsystem
 {
@@ -19,6 +21,9 @@ class UNREALLOGGER_API ULoggerSystem : public UGameInstanceSubsystem
 
 	/* Property */
 protected:
+	UPROPERTY(BlueprintAssignable, Category="FH|Logger")
+	FUnrealLoggerConnectedServer OnUnrealLoggerConnectedServer;
+	
 	// Default Setting
 	TSharedPtr<IWebSocket> LoggerWS;
 	bool IsUseGlobalLogSetting { false };
