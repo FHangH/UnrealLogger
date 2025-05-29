@@ -32,6 +32,15 @@ void ULoggerSystem::Deinitialize()
 
 void ULoggerSystem::MakeLoggerSetting(const FLoggerWebSocketSetting Setting)
 {
+	if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
+	{
+		if (!FModuleManager::Get().LoadModule("WebSockets"))
+		{
+			UE_LOG(LogTemp, Error, TEXT("WebSockets Module not loaded"));
+			return;
+		}
+	}
+	
 	IsUseQueueMode = Setting.IsUseEnableQueueMode;
 	QueueCheckInterval = Setting.QueueCheckIntervalSeconds;
 
