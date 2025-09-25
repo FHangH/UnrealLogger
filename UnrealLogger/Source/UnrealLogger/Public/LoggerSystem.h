@@ -27,7 +27,7 @@ protected:
 	// Default Setting
 	TSharedPtr<IWebSocket> LoggerWS;
 	bool IsUseGlobalLogSetting { false };
-	ELogType G_LogType { ELogType::ELT_Normal };
+    FString G_TagName {};
 	ELogSetting G_LogSetting { ELogSetting::ELS_All };
 
 	// Queue Mode Setting
@@ -44,7 +44,7 @@ public:
 	virtual void Deinitialize() override;
 	
 	UFUNCTION(BlueprintCallable, Category="FH|Logger")
-	void MakeLoggerSetting(FLoggerWebSocketSetting Setting);
+	void MakeLoggerSetting(FLoggerWebSocketSetting Setting, const FString& TagName = TEXT("Unknown"));
 
 	UFUNCTION(BlueprintCallable, Category="FH|Logger")
 	void SetGlobalLogSetting(const bool UseGlobalLogSetting, ELogSetting Global_LogSetting = ELogSetting::ELS_All);

@@ -130,7 +130,7 @@ UnrealLogger
 
 
 
-### 补充更新
+### 更新记录
 
 #### 2024-10-16
 
@@ -242,3 +242,37 @@ UnrealLogger
 ![image-20250305162119649](README.assets/image-20250305162119649.png)
 
 这样使用，比较靠谱，如果是在`GameMode`,`PlayerController`或其它`A*`的类型对象中使用，则不必担心这个问题
+
+
+
+#### 2025-09-25
+
+1. 补充了 `OnConnected` 和 `OnConnectionError` 的回调，结合 *2025-03-05* 的 方案，处理在UE 中过早使用 `PrintLog` 需要 `Delay` 一段时间的问题，可以在蓝图中调用完 `MakeLoggerSetting()` 之后，从蓝图子系统 `LoggerSystem` 中进行委托绑定
+
+   ```cpp
+   DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUnrealLoggerConnectedServer, bool, IsConnected);
+   
+   void ULoggerSystem::OnConnected()
+   {
+   	OnUnrealLoggerConnectedServer.Broadcast(true);
+   	UE_LOG(Logger, Log, TEXT("WebSocket connected!"));
+   }
+   
+   void ULoggerSystem::OnConnectionError(const FString& Error)
+   {
+   	OnUnrealLoggerConnectedServer.Broadcast(false);
+   	UE_LOG(Logger, Error, TEXT("Connection error: %s"), *Error);
+   }
+   ```
+
+   ![image-20250925131940412](README.assets/image-20250925131940412.png)
+
+2. 更新了 `UnrealLogger - LoggerSystem` 中的函数 `MakeLoggerSetting`，新增了 `TagName` 标记，确保服务端 `UE_Logger` 在日志中能辨别打印的日志消息源自于哪个客户端，默认为 `Unknown`
+
+   ![image-20250925130537389](README.assets/image-20250925130537389.png)
+
+   ![image-20250925130928836](README.assets/image-20250925130928836.png)
+
+3. 在 `UE_Logger` 中更新了，多客户端 Websocket 链接实例管理，目前可以通过 客户端的 `TagName` 正常区别客户端，同时也客户端和服务器建立链接和断开时，同UID进行区分管理
+   
+   ![image-20250925131241448](README.assets/image-20250925131241448.png)

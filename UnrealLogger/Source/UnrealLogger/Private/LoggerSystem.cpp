@@ -30,13 +30,13 @@ void ULoggerSystem::Deinitialize()
 	LogQueue.Empty();
 }
 
-void ULoggerSystem::MakeLoggerSetting(const FLoggerWebSocketSetting Setting)
+void ULoggerSystem::MakeLoggerSetting(const FLoggerWebSocketSetting Setting, const FString& TagName)
 {
 	if (!FModuleManager::Get().IsModuleLoaded("WebSockets"))
 	{
 		if (!FModuleManager::Get().LoadModule("WebSockets"))
 		{
-			UE_LOG(LogTemp, Error, TEXT("WebSockets Module not loaded"));
+			UE_LOG(Logger, Error, TEXT("WebSockets Module not loaded"));
 			return;
 		}
 	}
@@ -59,6 +59,7 @@ void ULoggerSystem::MakeLoggerSetting(const FLoggerWebSocketSetting Setting)
 	FWebSocketsModule& WebSocketModule = FWebSocketsModule::Get();
 	
 	LoggerWS = WebSocketModule.CreateWebSocket(WS_URL);
+    G_TagName = TagName.IsEmpty() ? TEXT("Unknown") : TagName;
 
 	if (LoggerWS.IsValid())
 	{
@@ -262,8 +263,9 @@ void ULoggerSystem::PrintUE_Log(const UObject* WorldContext, const bool IsUseWor
 		// 使用 JSON 库构建 LoggerString
 		const TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 		JsonObject->SetStringField(TEXT("time"), LoggerTime);
+        JsonObject->SetStringField(TEXT("tag"), G_TagName);
 		JsonObject->SetNumberField(TEXT("level"), LoggerLevel);
-		JsonObject->SetStringField(TEXT("content"), LogContent); // 直接使用 LogContent
+		JsonObject->SetStringField(TEXT("content"), LogContent);
 		
 		// 序列化 JSON 对象为字符串
 		FString LoggerString;
